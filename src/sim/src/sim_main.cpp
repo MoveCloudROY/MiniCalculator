@@ -7,6 +7,14 @@
 
 #define MAX_TEST 1000000
 
+// 遍历int8_t类型变量每一位并输出
+void printInt8(int8_t a) {
+    for (int i = 7; i >= 0; i--) {
+        std::cout << ((a >> i) & 0x01);
+    }
+    std::cout << std::endl;
+}
+
 int main(int argc, char **argv) {
     srand(time(0));
     VerilatedContext *contextp = new VerilatedContext;
@@ -28,10 +36,13 @@ int main(int argc, char **argv) {
         } else {
             std::cout << "Wrong: " << std::endl;
             std::cout << "op: ADD" << std::endl;
-            std::cout << "a: " << test[0] << std::endl;
-            std::cout << "b: " << test[1] << std::endl;
-            std::cout << "op: " << top->o << std::endl;
-            std::cout << "answer: " << test[1] << std::endl;
+            std::cout << "a: \t\t" << (int)test[0] << std::endl;
+            printInt8(test[0]);
+            std::cout << "b: \t\t" << (int)test[1] << std::endl;
+            printInt8(test[1]);
+            std::cout << "top->o\t\t: " << (int)top->o << std::endl;
+            std::cout << "answer: " << (int)test[2] << std::endl;
+            printInt8(test[2]);
             exit(-1);
         }
     }

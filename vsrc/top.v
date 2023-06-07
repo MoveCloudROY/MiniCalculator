@@ -1,8 +1,9 @@
 module top (
-    input [7:0] a,
-    input [7:0] b,
-    output [7:0] o
+    input [3:0] a,
+    input [3:0] b,
+    output [3:0] o
 );
-    assign o = a ^ b;
+    assign o = a + b;
+    
 
 endmodule
