@@ -23,9 +23,24 @@ jobs:
     - name: env
       # Set the Project Env Packages
       run: |
-        sudo apt install verilator cmake ninja-build
-        ls /usr/include/verilator/json/
-        ls /usr/share/verilator/
+        sudo apt install cmake ninja-build
+        sudo apt-get install git perl python3 make autoconf g++ flex bison ccache
+        sudo apt-get install libgoogle-perftools-dev numactl perl-doc
+        sudo apt-get install libfl2
+        sudo apt-get install libfl-dev
+        sudo apt-get install zlibc zlib1g zlib1g-dev
+
+    - name: Install Verilator
+      run: |
+        git clone https://github.com/verilator/verilator
+        unset VERILATOR_ROOT
+        cd verilator
+        git pull
+        git checkout v5.004
+        autoconf
+        ./configure
+        make -j `nproc`
+        sudo make install
 
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
