@@ -23,7 +23,9 @@ jobs:
     - name: env
       # Set the Project Env Packages
       run: |
-        sudo apt install verilator cmake ninja-build gtkwave
+        sudo apt install verilator cmake ninja-build
+        ls /usr/include/verilator/json/
+        ls /usr/share/verilator/
 
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
