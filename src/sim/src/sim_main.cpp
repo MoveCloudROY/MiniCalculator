@@ -1,8 +1,9 @@
+#include <Vtop.h>
+#include <verilated.h>
 #include <cstdint>
 #include <iostream>
-#include "Vtop.h"
-#include "verilated.h"
 #include <random>
+
 int main(int argc, char **argv) {
     srand(time(0));
     VerilatedContext *contextp = new VerilatedContext;
