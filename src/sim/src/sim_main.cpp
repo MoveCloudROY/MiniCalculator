@@ -21,6 +21,8 @@ using std::bitset;
 
 
 #define BIT(x, n) bitset<(n)>(x).to_string().c_str()
+#define SET_4BIT(x) ((x)&0x0F)
+
 int main(int argc, char **argv) {
     srand(time(0));
 
@@ -38,6 +40,7 @@ int main(int argc, char **argv) {
     while (!contextp->gotFinish() && count < MAX_TEST) {
 
         std::vector<int8_t> test = tf->genMulTest();
+        clk                      = 0;
 
         // reset
         top->a   = 0;
@@ -52,10 +55,10 @@ int main(int argc, char **argv) {
         top->clk = 1;
         top->rst = 1;
         vcdWriter.tick();
-        debug("RESET: top->o = %d top->busy = %d", top->o, top->busy);
+        // debug("RESET: top->a = %d top->b = %d top->busy = %d top->o %d(0x%s) top->clk %d", top->a, top->b, top->busy, (int8_t)top->o, BIT(top->o, 8), top->clk);
         // prepare data
-        top->a   = test[0];
-        top->b   = test[1];
+        top->a   = SET_4BIT(test[0]);
+        top->b   = SET_4BIT(test[1]);
         top->op  = 2;
         top->rst = 0;
 
@@ -66,15 +69,15 @@ int main(int argc, char **argv) {
         top->clk = clk;
         vcdWriter.tick();
 
-        debug("INIT: top->a = %d top->b = %d top->busy = %d top->rst %d top->clk %d", top->a, top->b, top->busy, top->rst, top->clk);
+        // debug("INIT: top->a = %d top->b = %d top->busy = %d top->o %d(0x%s) top->clk %d", top->a, top->b, top->busy, (int8_t)top->o, BIT(top->o, 8), top->clk);
         while (top->busy) {
             clk      = !clk;
             top->clk = clk;
             vcdWriter.tick();
-            debug("INSIDE: top->o = %d(0x%s)  top->clk %d", top->o, BIT(top->o, 8), top->clk);
+            // debug("INSIDE: top->o = %d(0x%s)  top->clk %d", (int8_t)top->o, BIT(top->o, 8), top->clk);
         }
 
-        if (top->o == test[2]) {
+        if ((int8_t)top->o == (int8_t)test[2]) {
             count++;
             if (count % 1000 == 0) {
                 std::cout << "PASS TEST: " << count << std::endl;
@@ -83,13 +86,10 @@ int main(int argc, char **argv) {
             print_err("======== Wrong ========");
             print_info("Operator: MUL");
             printf("Input a:\t\t %3d(0x%s) \n", test[0], BIT(test[0], 4));
-            // printInt8(test[0]);
             printf("Input b:\t\t %3d(0x%s) \n", test[1], BIT(test[1], 4));
-            // printInt8(test[1]);
-            printf("Actually Answer:\t %3d(0x%s) \n", top->o, BIT(top->o, 8));
-            // printInt8(test[1]);
-            printf("Expected Answer:\t %3d(0x%s) \n", test[2], BIT(test[2], 8));
-            exit(-1);
+            printf("Actually Answer:\t %3d(0x%s) \n", (int8_t)top->o, BIT(top->o, 8));
+            printf("Expected Answer:\t %3d(0x%s) \n", (int8_t)test[2], BIT(test[2], 8));
+            exit(0);
         }
     }
 

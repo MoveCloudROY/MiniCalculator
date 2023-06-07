@@ -11,21 +11,19 @@ module alu (
     output reg       busy
 );
     reg reg_busy;
-    reg [8:0] reg_o;
-    reg [3:0] reg_op;
+    reg [9:0] reg_o;
     
     reg [2:0] reg_calc_cnt;
-    reg [3:0] M, M_comp;
+    reg [4:0] M, M_comp;
     reg [1:0] reg_step;
 
     always @(posedge clk) begin 
         if (rst) begin
             reg_busy <= 1'b0;
-            reg_o <= 9'd0;
-            reg_op <= 4'd0;
+            reg_o <= 10'd0;
             reg_calc_cnt <= 3'd0;
             reg_step <= 2'd0;
-            {M, M_comp} <= {4'd0, 4'd0};
+            {M, M_comp} <= {5'd0, 5'd0};
         end
         
         case (op)
@@ -35,11 +33,20 @@ module alu (
             4'b0100: begin
                 reg_o[4:0] <= data1 - data2;
             end
+            /*
+             *   The above-mentioned technique is inadequate when the multiplicand
+             *   is the most negative number that can be represented 
+             *   (e.g. if the multiplicand has 4 bits then this value is −8). 
+             *   This is because then an overflow occurs when computing -m, 
+             *   the negation of the multiplicand, which is needed in order to set S.
+             *
+             *   ref: https://en.wikipedia.org/wiki/Booth%27s_multiplication_algorithm
+            */
             4'b0010: begin
                 case (reg_step)
                     2'd0: begin
-                        {M, M_comp} <= {data1, ~data1 + 1'b1};
-                        reg_o <= {4'b0, data2, 1'b0};
+                        {M, M_comp} <= {{data1[3], data1}, ~{data1[3], data1} + 1'b1};
+                        reg_o <= {5'd0, data2, 1'b0};
                         reg_step <= reg_step + 1'b1;
                         reg_calc_cnt <=  3'd0;
                         reg_busy <= 1'b1;
@@ -47,15 +54,15 @@ module alu (
                     2'd1: begin
                         if (reg_calc_cnt == 3'd4) begin
                             reg_busy <= 1'b0;
-                            reg_o <= {1'b0, reg_o[8:1]};
+                            reg_o <= {reg_o[9], reg_o[9:1]};
                             reg_step <= reg_step + 2'd2;
                         end
                         else if(reg_o[1:0] == 2'b01) begin
-                            reg_o <= {reg_o[8:5] + M_comp, reg_o[4:0]};
+                            reg_o <= {reg_o[9:5] + M, reg_o[4:0]};
                             reg_step <= reg_step + 1'd1;
                         end
                         else if(reg_o[1:0] == 2'b10) begin
-                            reg_o <= {reg_o[8:5] + M, reg_o[4:0]};
+                            reg_o <= {reg_o[9:5] + M_comp, reg_o[4:0]};
                             reg_step <= reg_step + 1'd1;
                         end
                         else begin
@@ -64,7 +71,7 @@ module alu (
                         
                     end
                     2'd2: begin
-                        reg_o <= {reg_o[8], reg_o[8:1]};
+                        reg_o <= {reg_o[9], reg_o[9:1]};
                         reg_calc_cnt <= reg_calc_cnt + 1'd1;
                         reg_step <= reg_step - 1'd1;
                     end
