@@ -1,8 +1,8 @@
-#include <Vtop.h>
-#include <verilated.h>
 #include <cstdint>
 #include <iostream>
 #include <random>
+#include <Vtop.h>
+#include <verilated.h>
 
 int main(int argc, char **argv) {
     srand(time(0));
