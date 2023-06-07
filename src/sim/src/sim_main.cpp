@@ -13,16 +13,16 @@ int main(int argc, char **argv) {
     contextp->commandArgs(argc, argv);
     Vtop *top = new Vtop{contextp};
 
-    testFactory tf = new testFactory();
+    testFactory *tf = new testFactory();
     int64_t count = 0;
     while (!contextp->gotFinish() && count < MAX_TEST) {
-        std::vector <uint8_t> test = tf.genAddTest();
+        std::vector <int8_t> test = tf->genAddTest();
         top->a = test[0];
         top->b = test[1];
         top->eval();
         if (top->o == test[2]) {
             count++;
-            if count % 1000 == 0 {
+            if (count % 1000 == 0) {
                 std::cout << "PASS TEST: " << count << std::endl;
             }
         } else {
