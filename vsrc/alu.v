@@ -12,16 +12,19 @@ module alu (
 );
     reg reg_busy;
     reg [8:0] reg_o;
+    
+    reg [2:0] reg_calc_cnt;
+    reg [3:0] M, m;
 
     always @(posedge clk) begin 
         if (rst) begin
-            reg_busy <= 0;
-            assign busy = 0;
-            assign output = 0;
+            reg_busy <= 1'b0;
+            reg_o <= 9'd0;
+            reg_calc_cnt <= 3'd0;
+            {M, Q} <= {4'd0, 4'd0};
         end
         
-
-        casez (op)
+        case (op)
             2'b1000: begin
                 tmp_o = a + b;
             end 
@@ -33,7 +36,7 @@ module alu (
             end
 
             2'b0001: begin
-
+                
             end
 
             default: begin
@@ -42,7 +45,7 @@ module alu (
             end 
         endcase
         
-        assign reg = reg_busy;
+        assign busy = reg_busy;
         assign o = reg_o[7:0];
     end
 
