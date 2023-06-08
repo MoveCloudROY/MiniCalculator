@@ -76,3 +76,23 @@ std::vector<int8_t> testFactory::genDivTest() {
     test.push_back(rem);
     return test;
 }
+
+// 生成随机测试, nop表示是否包含nop测试
+testCase testFactory::genRandomTest(bool nop) {
+    // 随机生成两个操作数a和b, 范围-8到7
+    int8_t a    = rand() % 16 - 8;
+    int8_t b    = rand() % 16 - 8;
+    // 计算正确的结果
+    int8_t sum  = (a + b) & 0x0f;
+    int8_t diff = a - b;
+    int8_t prod_h = (a * b)>>4; // 乘法高位
+    int8_t prod_l = a * b; // 乘法地位
+    int8_t quot = a / b;
+    int8_t rem  = a % b;
+    // 随机选择8, 4, 2, 1, 0中的一个作为操作码
+    uint8_t opCode = (1 << ( rand()% (nop ? 5 : 4) ) ) & 0x0f;
+    std::vector<int8_t> params = {a, b, sum, diff, prod_l, prod_h, quot, rem};
+    
+    return testCase(opCode, params);
+    
+}

@@ -34,13 +34,16 @@ int main(int argc, char **argv) {
 
     testFactory *tf    = new testFactory();
     int64_t      count = 0;
+    int8_t       expected = 0;
     bool         clk   = 0;
 
 
     while (!contextp->gotFinish() && count < MAX_TEST) {
+        std::cout << "flag0" << std::endl;
 
-        std::vector<int8_t> test = tf->genMulTest();
+        testCase           tc   = tf->genRandomTest(false);
         clk                      = 0;
+        std::cout << "#" << std::endl;
 
         // reset
         top->a   = 0;
@@ -57,9 +60,9 @@ int main(int argc, char **argv) {
         vcdWriter.tick();
         // debug("RESET: top->a = %d top->b = %d top->busy = %d top->o %d(0x%s) top->clk %d", top->a, top->b, top->busy, (int8_t)top->o, BIT(top->o, 8), top->clk);
         // prepare data
-        top->a   = SET_4BIT(test[0]);
-        top->b   = SET_4BIT(test[1]);
-        top->op  = 2;
+        top->a   = SET_4BIT(tc.op1);
+        top->b   = SET_4BIT(tc.op2);
+        top->op  = tc.opCode;
         top->rst = 0;
 
         top->clk = clk;
@@ -76,21 +79,24 @@ int main(int argc, char **argv) {
             vcdWriter.tick();
             // debug("INSIDE: top->o = %d(0x%s)  top->clk %d", (int8_t)top->o, BIT(top->o, 8), top->clk);
         }
-
-        if ((int8_t)top->o == (int8_t)test[2]) {
+        std::cout << "flag1" << std::endl;
+        expected = (SET_4BIT(tc.res2) << 4) | SET_4BIT(tc.res1);
+        std::cout << "flag2" << std::endl;
+        if ((int8_t)top->o == expected) {
             count++;
             if (count % 1000 == 0) {
                 std::cout << "PASS TEST: " << count << std::endl;
             }
         } else {
-            print_err("======== Wrong ========");
-            print_info("Operator: MUL");
-            printf("Input a:\t\t %3d(0x%s) \n", test[0], BIT(test[0], 4));
-            printf("Input b:\t\t %3d(0x%s) \n", test[1], BIT(test[1], 4));
+            print_err("======== WRONG ========");
+            print_info("Operator: %s", tc.op.c_str());
+            printf("Input a:\t\t %3d(0x%s) \n", tc.op1, BIT(tc.op1, 4));
+            printf("Input b:\t\t %3d(0x%s) \n", tc.op2, BIT(tc.op2, 4));
             printf("Actually Answer:\t %3d(0x%s) \n", (int8_t)top->o, BIT(top->o, 8));
-            printf("Expected Answer:\t %3d(0x%s) \n", (int8_t)test[2], BIT(test[2], 8));
+            printf("Expected Answer:\t %3d(0x%s) \n", expected, BIT(expected, 8));
             exit(0);
         }
+        std::cout << "flag3" << std::endl;
     }
 
     delete top;

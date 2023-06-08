@@ -7,7 +7,7 @@ module alu (
     input  [3:0] op,
     input  [3:0] data1,
     input  [3:0] data2,
-    output reg [7:0] o,
+    output reg [7:0] o, // 前4位存余数, 后4位存商
     output reg       busy
 );
     reg reg_busy;
