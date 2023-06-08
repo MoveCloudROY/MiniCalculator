@@ -12,6 +12,7 @@ module top (
     alu alu_t(
         .clk(clk),
         .rst(rst),
+        .sign(1),
         .data1 (a),
         .data2 (b),
         .op(op),

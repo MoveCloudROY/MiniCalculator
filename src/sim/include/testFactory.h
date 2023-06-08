@@ -4,6 +4,8 @@
 
 #include "testCase.h"
 
+#define SET_4BIT(x) ((x)&0x0F)
+
 // 用于生成加减乘除四则运算的测试用例
 // 有4个public方法: genAddTest, genSubTest, genMulTest, genDivTest
 // 每个方法内部随机生成两个操作数, 并计算出正确的结果

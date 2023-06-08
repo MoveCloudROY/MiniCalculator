@@ -4,6 +4,7 @@ module alu (
 
     // 1000 0100 0010 0001 0000
     //  +    -    *    /   STOP
+    input        sign,
     input  [3:0] op,
     input  [3:0] data1,
     input  [3:0] data2,
@@ -15,7 +16,7 @@ module alu (
     
     reg [2:0] reg_calc_cnt;
     reg [4:0] M, M_comp;
-    reg [1:0] reg_step;
+    reg [1:0] reg_state;
 
     reg [7:0] reg_data1_ext;
     reg [7:0] reg_data2_ext;
@@ -27,7 +28,7 @@ module alu (
             reg_busy <= 1'b0;
             reg_o <= 10'd0;
             reg_calc_cnt <= 3'd0;
-            reg_step <= 2'd0;
+            reg_state <= 2'd0;
             {M, M_comp} <= {5'd0, 5'd0};
         end
         
@@ -48,11 +49,11 @@ module alu (
              *   ref: https://en.wikipedia.org/wiki/Booth%27s_multiplication_algorithm
             */
             4'b0010: begin
-                case (reg_step)
+                case (reg_state)
                     2'd0: begin
                         {M, M_comp} <= {{data1[3], data1}, ~{data1[3], data1} + 1'b1};
                         reg_o <= {5'd0, data2, 1'b0};
-                        reg_step <= reg_step + 1'b1;
+                        reg_state <= reg_state + 1'b1;
                         reg_calc_cnt <=  3'd0;
                         reg_busy <= 1'b1;
                     end 
@@ -60,30 +61,30 @@ module alu (
                         if (reg_calc_cnt == 3'd4) begin
                             reg_busy <= 1'b0;
                             reg_o <= {reg_o[9], reg_o[9:1]};
-                            reg_step <= reg_step - 1'd1;
+                            reg_state <= reg_state - 1'd1;
                         end
                         else if(reg_o[1:0] == 2'b01) begin
                             reg_o <= {reg_o[9:5] + M, reg_o[4:0]};
-                            reg_step <= reg_step + 1'd1;
+                            reg_state <= reg_state + 1'd1;
                         end
                         else if(reg_o[1:0] == 2'b10) begin
                             reg_o <= {reg_o[9:5] + M_comp, reg_o[4:0]};
-                            reg_step <= reg_step + 1'd1;
+                            reg_state <= reg_state + 1'd1;
                         end
                         else begin
-                            reg_step <= reg_step + 1'd1;
+                            reg_state <= reg_state + 1'd1;
                         end
                         
                     end
                     2'd2: begin
                         reg_o <= {reg_o[9], reg_o[9:1]};
                         reg_calc_cnt <= reg_calc_cnt + 1'd1;
-                        reg_step <= reg_step - 1'd1;
+                        reg_state <= reg_state - 1'd1;
                     end
 
                     // ?
                     2'd3: begin
-                        reg_step <= 2'd0;
+                        reg_state <= 2'd0;
                     end 
                 endcase
             end
@@ -91,42 +92,79 @@ module alu (
             4'b0001: begin
                 // 0000 xxxx
                 // xxxx 0000
-                case(reg_step)
+                case(reg_state)
                     2'd0: begin
                         reg_o <= 10'd0;
-                        reg_data1_ext <= {4'd0, data1};
-                        reg_data2_ext <= {data2, 4'd0};
+                        if (sign && data1[3]) begin
+                            reg_data1_ext <= {4'd0, ~data1 + 1'b1};
+                        end
+                        else begin
+                            reg_data1_ext <= {4'd0, data1};
+                        end
+                        if (sign && data2[3]) begin
+                            reg_data2_ext <= {~data2 + 1'b1, 4'd0};
+                        end
+                        else begin
+                            reg_data2_ext <= {data2, 4'd0};
+                        end
+                        
                         reg_busy <= 1'b1;
                         reg_calc_cnt <= 3'd0;
-                        reg_step <= reg_step + 1'b1;
+                        
+                        if (data2 == 0) begin
+                            reg_state <= reg_state + 2'd3;
+                        end else begin
+                            reg_state <= reg_state + 1'b1;
+                        end
                     end
                     2'd1: begin
-                        reg_data1_ext <= reg_data1_ext << 1'b1;
-                        reg_o <= reg_o << 1'b1;
-                        reg_step <= reg_step + 1'b1;
-                    end
-                    2'd2: begin
                         if (reg_calc_cnt == 3'd4) begin
+                            if (sign && (data1[3] ^ data2[3])) begin
+                                reg_o[7:4] <=  ~reg_o[3:0] + 1'b1;
+                            end else begin
+                                reg_o[7:4] <=  reg_o[3:0];
+                            end
+                            if (sign && (data1[3] ^ reg_data1_ext[7])) begin
+                                reg_o[3:0] <= ~reg_data1_ext[7:4]+1'b1;
+                            end else begin
+                                reg_o[3:0] <= reg_data1_ext[7:4];
+                            end
+                            reg_o[9:8] <= 2'd0;
                             reg_busy <= 1'b0;
                             reg_calc_cnt <= 3'd0;
-                            reg_step <= reg_step - 2'd2;
+
+                            reg_state <= 2'd0;
                         end
-                        else if (reg_data1_ext >= reg_data2_ext) begin
+                        else begin
+                            reg_data1_ext <= {reg_data1_ext[6:0], 1'b0};
+                            reg_o <= {reg_o[8:0], 1'b0};
+
+                            reg_state <= reg_state + 1'b1;
+                        end
+                    end
+                    2'd2: begin
+                        
+                        if (reg_data1_ext >= reg_data2_ext) begin
                             reg_data1_ext <= reg_data1_ext - reg_data2_ext;
                             reg_o[0] <= 1'b1;
-                            reg_step <= reg_step - 1'b1;
                             reg_calc_cnt <= reg_calc_cnt + 1'b1;
+
+                            reg_state <= reg_state - 1'b1;
                         end
                         else begin
                             reg_data1_ext <= reg_data1_ext;
                             reg_o[0] <= 1'b0;
-                            reg_step <= reg_step - 1'b1;
                             reg_calc_cnt <= reg_calc_cnt + 1'b1;
+
+                            reg_state <= reg_state - 1'b1;
                         end
                     end
                     
                     2'd3: begin
-                        
+                        reg_o <= 10'd0;
+                        reg_busy <= 1'b0;
+                        reg_calc_cnt <= 3'd0;
+                        reg_state <= 2'd0;
                     end
 
                 endcase

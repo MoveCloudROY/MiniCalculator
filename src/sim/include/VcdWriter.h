@@ -19,6 +19,7 @@ public:
     }
     ~VcdWriter() {
         tfp->close();
+        delete tfp;
     }
     void tick() {
         context->timeInc(1);
