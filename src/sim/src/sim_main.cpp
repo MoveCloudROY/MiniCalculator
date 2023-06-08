@@ -40,7 +40,7 @@ int main(int argc, char **argv) {
 
     while (!contextp->gotFinish() && count < MAX_TEST) {
 
-        testCase           tc   = tf->genRandomTest(false);
+        testCase           tc   = tf->genDivTest();
         clk                      = 0;
 
         // reset

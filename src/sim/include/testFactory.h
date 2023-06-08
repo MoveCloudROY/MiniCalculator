@@ -25,7 +25,7 @@ public:
     std::vector<int8_t> genAddTest(int a, int b);
     std::vector<int8_t> genSubTest();
     std::vector<int8_t> genMulTest();
-    std::vector<int8_t> genDivTest();
+    testCase genDivTest();
     testCase genRandomTest(bool no);
 };
 
