@@ -1,9 +1,22 @@
 module top (
+    input clk,
+    input rst,
     input [3:0] a,
     input [3:0] b,
-    output [3:0] o
+    input [3:0] op,
+    output [7:0] o,
+    output wire busy
 );
-    assign o = a + b;
-    
+
+
+    alu alu_t(
+        .clk(clk),
+        .rst(rst),
+        .data1 (a),
+        .data2 (b),
+        .op(op),
+        .busy(busy),
+        .o(o)
+    );
 
 endmodule
