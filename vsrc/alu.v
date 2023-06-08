@@ -17,6 +17,11 @@ module alu (
     reg [4:0] M, M_comp;
     reg [1:0] reg_step;
 
+    reg [7:0] reg_data1_ext;
+    reg [7:0] reg_data2_ext;
+
+
+
     always @(posedge clk) begin 
         if (rst) begin
             reg_busy <= 1'b0;
@@ -55,7 +60,7 @@ module alu (
                         if (reg_calc_cnt == 3'd4) begin
                             reg_busy <= 1'b0;
                             reg_o <= {reg_o[9], reg_o[9:1]};
-                            reg_step <= reg_step + 2'd2;
+                            reg_step <= reg_step - 1'd1;
                         end
                         else if(reg_o[1:0] == 2'b01) begin
                             reg_o <= {reg_o[9:5] + M, reg_o[4:0]};
@@ -75,6 +80,8 @@ module alu (
                         reg_calc_cnt <= reg_calc_cnt + 1'd1;
                         reg_step <= reg_step - 1'd1;
                     end
+
+                    // ?
                     2'd3: begin
                         reg_step <= 2'd0;
                     end 
@@ -82,9 +89,50 @@ module alu (
             end
 
             4'b0001: begin
-                
-            end
+                // 0000 xxxx
+                // xxxx 0000
+                case(reg_step)
+                    2'd0: begin
+                        reg_o <= 10'd0;
+                        reg_data1_ext <= {4'd0, data1};
+                        reg_data2_ext <= {data2, 4'd0};
+                        reg_busy <= 1'b1;
+                        reg_calc_cnt <= 3'd0;
+                        reg_step <= reg_step + 1'b1;
+                    end
+                    2'd1: begin
+                        reg_data1_ext <= reg_data1_ext << 1'b1;
+                        reg_o <= reg_o << 1'b1;
+                        reg_step <= reg_step + 1'b1;
+                    end
+                    2'd2: begin
+                        if (reg_calc_cnt == 3'd4) begin
+                            reg_busy <= 1'b0;
+                            reg_calc_cnt <= 3'd0;
+                            reg_step <= reg_step - 2'd2;
+                        end
+                        else if (reg_data1_ext >= reg_data2_ext) begin
+                            reg_data1_ext <= reg_data1_ext - reg_data2_ext;
+                            reg_o[0] <= 1'b1;
+                            reg_step <= reg_step - 1'b1;
+                            reg_calc_cnt <= reg_calc_cnt + 1'b1;
+                        end
+                        else begin
+                            reg_data1_ext <= reg_data1_ext;
+                            reg_o[0] <= 1'b0;
+                            reg_step <= reg_step - 1'b1;
+                            reg_calc_cnt <= reg_calc_cnt + 1'b1;
+                        end
+                    end
+                    
+                    2'd3: begin
+                        
+                    end
 
+                endcase
+
+
+            end
             default: begin
             
             end 
