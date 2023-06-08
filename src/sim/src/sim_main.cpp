@@ -39,11 +39,9 @@ int main(int argc, char **argv) {
 
 
     while (!contextp->gotFinish() && count < MAX_TEST) {
-        std::cout << "flag0" << std::endl;
 
         testCase           tc   = tf->genRandomTest(false);
         clk                      = 0;
-        std::cout << "#" << std::endl;
 
         // reset
         top->a   = 0;
@@ -79,9 +77,7 @@ int main(int argc, char **argv) {
             vcdWriter.tick();
             // debug("INSIDE: top->o = %d(0x%s)  top->clk %d", (int8_t)top->o, BIT(top->o, 8), top->clk);
         }
-        std::cout << "flag1" << std::endl;
         expected = (SET_4BIT(tc.res2) << 4) | SET_4BIT(tc.res1);
-        std::cout << "flag2" << std::endl;
         if ((int8_t)top->o == expected) {
             count++;
             if (count % 1000 == 0) {
@@ -96,7 +92,6 @@ int main(int argc, char **argv) {
             printf("Expected Answer:\t %3d(0x%s) \n", expected, BIT(expected, 8));
             exit(0);
         }
-        std::cout << "flag3" << std::endl;
     }
 
     delete top;
