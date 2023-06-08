@@ -24,6 +24,18 @@ std::vector<int8_t> testFactory::genAddTest()
     return test;
 }
 
+std::vector<int8_t> testFactory::genAddTest(int a, int b)
+{
+    std::vector<int8_t> test;
+    // 计算正确的结果, 高4位恒为0
+    int8_t sum = (a + b) & 0x0f; // 忽略溢出
+    // int8_t sum = (a + b); // 忽略溢出
+    test.push_back(a);
+    test.push_back(b);
+    test.push_back(sum);
+    return test;
+}
+
 // 生成减法测试
 std::vector<int8_t> testFactory::genSubTest()
 {
