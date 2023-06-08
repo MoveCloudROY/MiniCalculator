@@ -40,6 +40,11 @@ int main(int argc, char **argv) {
 
     testFactory *tf    = new testFactory();
     int64_t      count = 0;
+<<<<<<< HEAD
+=======
+    int8_t       expected = 0;
+    bool         clk   = 0;
+>>>>>>> 8816057d3e3a5a191fca5111eabc68a5beb0d423
 
     // reset
     top->a   = 0;
@@ -57,15 +62,67 @@ int main(int argc, char **argv) {
 
     while (!contextp->gotFinish() && count < MAX_TEST) {
 
+<<<<<<< HEAD
         auto check = emulateMul(top, tf, vcdWriter);
 
         if (check) {
+=======
+        testCase           tc   = tf->genDivTest();
+        clk                      = 0;
+
+        // reset
+        top->a   = 0;
+        top->b   = 0;
+        top->op  = 0;
+        top->clk = 0;
+        top->rst = 1;
+        vcdWriter.tick();
+        top->a   = 0;
+        top->b   = 0;
+        top->op  = 0;
+        top->clk = 1;
+        top->rst = 1;
+        vcdWriter.tick();
+        // debug("RESET: top->a = %d top->b = %d top->busy = %d top->o %d(0x%s) top->clk %d", top->a, top->b, top->busy, (int8_t)top->o, BIT(top->o, 8), top->clk);
+        // prepare data
+        top->a   = SET_4BIT(tc.op1);
+        top->b   = SET_4BIT(tc.op2);
+        top->op  = tc.opCode;
+        top->rst = 0;
+
+        top->clk = clk;
+        vcdWriter.tick();
+
+        clk      = !clk;
+        top->clk = clk;
+        vcdWriter.tick();
+
+        // debug("INIT: top->a = %d top->b = %d top->busy = %d top->o %d(0x%s) top->clk %d", top->a, top->b, top->busy, (int8_t)top->o, BIT(top->o, 8), top->clk);
+        while (top->busy) {
+            clk      = !clk;
+            top->clk = clk;
+            vcdWriter.tick();
+            // debug("INSIDE: top->o = %d(0x%s)  top->clk %d", (int8_t)top->o, BIT(top->o, 8), top->clk);
+        }
+        expected = (SET_4BIT(tc.res2) << 4) | SET_4BIT(tc.res1);
+        if ((int8_t)top->o == expected) {
+>>>>>>> 8816057d3e3a5a191fca5111eabc68a5beb0d423
             count++;
             if (count % 1000 == 0) {
                 std::cout << "PASS TEST: " << count << std::endl;
             }
         } else {
+<<<<<<< HEAD
             break;
+=======
+            print_err("======== WRONG ========");
+            print_info("Operator: %s", tc.op.c_str());
+            printf("Input a:\t\t %3d(0x%s) \n", tc.op1, BIT(tc.op1, 4));
+            printf("Input b:\t\t %3d(0x%s) \n", tc.op2, BIT(tc.op2, 4));
+            printf("Actually Answer:\t %3d(0x%s) \n", (int8_t)top->o, BIT(top->o, 8));
+            printf("Expected Answer:\t %3d(0x%s) \n", expected, BIT(expected, 8));
+            exit(0);
+>>>>>>> 8816057d3e3a5a191fca5111eabc68a5beb0d423
         }
     }
 

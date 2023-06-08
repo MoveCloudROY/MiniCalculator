@@ -25,7 +25,11 @@ public:
     std::vector<int8_t> genAddTest(int a, int b);
     std::vector<int8_t> genSubTest();
     std::vector<int8_t> genMulTest();
+<<<<<<< HEAD
     std::vector<int8_t> genDivTest();
+=======
+    testCase genDivTest();
+>>>>>>> 8816057d3e3a5a191fca5111eabc68a5beb0d423
     testCase genRandomTest(bool no);
 };
 
