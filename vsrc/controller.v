@@ -1,4 +1,4 @@
-module controller(
+module Controller(
     input clk,
     input rst,
     input [7:0] sw_i,           // 开关 
@@ -13,12 +13,12 @@ module controller(
 );
 
 wire event_ProDiv; // 乘法/除法事件(非除零)
-assign event_ProDiv = (btn_i[1] | btn_i[0]) & ~event_Zero;
 wire event_AddSub; // 加法/减法事件
-assign event_AddSub = btn_i[3] | btn_i[2];
 wire event_Zero;   // 除零事件
-assign event_Zero = btn_i[0] & (sw_i[3:0] == 4'b0000);
 wire event_ALUEND; // 运算结束事件
+assign event_ProDiv = (btn_i[1] | btn_i[0]) & ~event_Zero;
+assign event_AddSub = btn_i[3] | btn_i[2];
+assign event_Zero = btn_i[0] & (sw_i[3:0] == 4'b0000);
 assign event_ALUEND = ~alu_busy_i;
 
 wire[2:0] next_state; // 下一个状态
@@ -112,34 +112,41 @@ always @(*) begin
     alu_op_o = 4'b0000;
     led_o = 1'b1;
     case (current_state)
-        3'b000: // 初始状态
+        3'b000: begin // 初始状态
             seg_sel_o = 4'b0000;
             alu_op_o = 4'b0000;
             led_o = 1'b0;
-        3'b001: // 开始加法/减法
+        end
+        3'b001: begin // 开始加法/减法
             seg_sel_o = 4'b1100;
             alu_op_o = (btn_i[3]) ? 4'b1000 : 4'b0100;
             led_o = 1'b0;
-        3'b010: // 结束加法/减法
+        end
+        3'b010: begin // 结束加法/减法
             seg_sel_o = 4'b1101;
             alu_op_o = 4'b0000;
             led_o = 1'b0;
-        3'b011: // 开始乘法/除法
+        end
+        3'b011: begin // 开始乘法/除法
             seg_sel_o = 4'b1100;
             alu_op_o = (btn_i[1]) ? 4'b0010 : 4'b0001;
             led_o = 1'b0;
-        3'b100: // 结束乘法/除法
+        end    
+        3'b100: begin // 结束乘法/除法
             seg_sel_o = 4'b1111;
             alu_op_o = 4'b0000;
             led_o = 1'b0;
-        3'b101: // 停机(除零)
+        end            
+        3'b101: begin // 停机(除零)
             seg_sel_o = 4'b0000;
             alu_op_o = 4'b0000;
             led_o = 1'b1;
-        default: 
+        end
+        default: begin
             seg_sel_o = 4'b0000;
             alu_op_o = 4'b0000;
             led_o = 1'b1;
+        end
     endcase
 end
 

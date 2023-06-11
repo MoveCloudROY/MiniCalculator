@@ -1,4 +1,4 @@
-module seg7(
+module Seg7(
     input [15:0] num, // 四位七段数码管显示的数字
     input clk, // 时钟
     input [3:0] sel, // 七段数码管选择
