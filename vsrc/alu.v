@@ -4,7 +4,7 @@ module alu (
 
     // 1000 0100 0010 0001 0000
     //  +    -    *    /   STOP
-    input        sign,
+    input        sign, // 是否为有符号运算
     input  [3:0] op,
     input  [3:0] data1,
     input  [3:0] data2,
