@@ -1,11 +1,13 @@
 module Seg7(
     input [15:0] num, // 四位七段数码管显示的数字
     input clk, // 时钟
+    input rst, // 复位
     input [3:0] sel, // 七段数码管选择
     output [6:0] seg, // 七段数码管阴极
     output [3:0] an // 七段数码管阳极
 );
-
+    reg[16:0] clk_counter; // 时钟分频
+    reg new_clk;
     reg[3:0] seg_sel_t = 4'b0001; // 七段数码管选择, 每个时钟周期左移一位
     reg[6:0] seg_show_t;  // 实际选择的阴极输出
 
@@ -16,25 +18,43 @@ module Seg7(
     assign show_data[2] = convert(num[11:8]);
     assign show_data[3] = convert(num[15:12]);
 
-    always @(posedge clk)
+    always @(posedge new_clk)
     begin
         seg_sel_t <= seg_sel_t << 1'b1;
         if (seg_sel_t == 4'b1000)
             seg_sel_t <= 4'b0001;
     end
 
-    always @(seg_sel_t)
+    always @(posedge clk) begin
+        if (rst == 1'b1) begin
+            clk_counter <= 16'd0;
+        end else if (clk_counter == 16'hffff) begin
+            clk_counter <= 16'd0;
+        end else begin
+            clk_counter <= clk_counter + 16'd1;
+        end
+    end
+
+    always @(*) begin
+        if (clk_counter[15] == 1'b1)
+            new_clk = 1'b1;
+        else
+            new_clk = 1'b0;
+    end
+
+    always @(*)
     begin
         case(seg_sel_t)
-            4'b0001: seg_show_t = (sel[1]) ? show_data[0] : 7'h111_1111;
-            4'b0010: seg_show_t = (sel[2]) ? show_data[1] : 7'h111_1111;
-            4'b0100: seg_show_t = (sel[3]) ? show_data[2] : 7'h111_1111;
-            default: seg_show_t = (sel[4]) ? show_data[3] : 7'h111_1111;
+            4'b0001: seg_show_t = (sel[0]) ? show_data[0] : 7'b111_1111;
+            4'b0010: seg_show_t = (sel[1]) ? show_data[1] : 7'b111_1111;
+            4'b0100: seg_show_t = (sel[2]) ? show_data[2] : 7'b111_1111;
+            default: seg_show_t = (sel[3]) ? show_data[3] : 7'b111_1111;
         endcase
     end
 
     assign seg = seg_show_t;
     assign an = ~seg_sel_t; // 取反输出(电路相关)
+    // assign an = 4'b1110;
 
 
     function[6:0] convert;

@@ -6,10 +6,10 @@ module Controller(
     input wire alu_busy_i,      // 运算器忙
     input [7:0] alu_i,          // 运算器结果
 
-    output [15:0] seg_num_o,    // 数码管显示的数字
-    output [3:0] seg_sel_o,     // 数码管选择
-    output [3:0] alu_op_o,      // 运算器的运算
-    output wire led_o           // 除零LED
+    output wire[15:0] seg_num_o,    // 数码管显示的数字
+    output reg[3:0] seg_sel_o,     // 数码管选择
+    output reg[3:0] alu_op_o,      // 运算器的运算
+    output reg led_o           // 除零LED
 );
 
 wire event_ProDiv; // 乘法/除法事件(非除零)
@@ -21,7 +21,7 @@ assign event_AddSub = btn_i[3] | btn_i[2];
 assign event_Zero = btn_i[0] & (sw_i[3:0] == 4'b0000);
 assign event_ALUEND = ~alu_busy_i;
 
-wire[2:0] next_state; // 下一个状态
+reg[2:0] next_state; // 下一个状态
 
 // 状态寄存器: 
 // 000: 初始状态
@@ -34,7 +34,9 @@ reg [2:0] current_state; // 当前状态
 reg [7:0] current_alu_sum; // 当前运算器的结果
 
 always @(posedge clk) begin
-    if (
+    if (rst) begin
+        current_alu_sum <= 8'b0;
+    end else if (
         ((current_state == 3'b001) || (current_state == 3'b011)) && 
         ((next_state == 3'b010) || (next_state == 3'b100))
        ) begin  // 当运算结束时, 将运算结果保存到current_alu_sum中
@@ -113,7 +115,7 @@ always @(*) begin
     led_o = 1'b1;
     case (current_state)
         3'b000: begin // 初始状态
-            seg_sel_o = 4'b0000;
+            seg_sel_o = 4'b1100;
             alu_op_o = 4'b0000;
             led_o = 1'b0;
         end

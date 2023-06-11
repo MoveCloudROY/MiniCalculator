@@ -14,9 +14,9 @@ always @(posedge clk) begin
     end else if (btn_i[2] == 1'b1) begin // 减法
         btn <= 4'b0100;
     end else if (btn_i[1] == 1'b1) begin // 乘法
-        btn <= 4'b0100;
+        btn <= 4'b0010;
     end else if (btn_i[0] == 1'b1) begin // 除法
-        btn <= 4'b0100;
+        btn <= 4'b0001;
     end else begin // 没有按键按下
         btn <= 4'b0000;
     end

@@ -1,4 +1,4 @@
-module alu (
+module ALU (
     input rst,
     input clk,
 
@@ -178,6 +178,8 @@ module alu (
         
     end
 
-    assign busy = reg_busy;
-    assign o = reg_o[7:0];
+    always @(*) begin
+        busy <= reg_busy;
+        o <= reg_o[7:0];
+    end
 endmodule

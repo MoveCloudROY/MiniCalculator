@@ -25,30 +25,31 @@ module top (
         .seg_num_o(num_t),
         .seg_sel_o(sel_t),
         .alu_op_o(alu_op),
-        .led_o(led_o),
+        .led_o(led_o)
     );
 
     Switches sw(
         .clk(clk),
         .sw_i(sw_i),
-        .sw_o(sw_t),
+        .sw_o(sw_t)
     );
 
     Buttons btn(
         .clk(clk),
         .btn_i(btn_i),
-        .btn_o(btn_t),
+        .btn_o(btn_t)
     );
 
     Seg7 seg7(
-        .num(num_t)
+        .num(num_t),
         .clk(clk),
+        .rst(rst),
         .sel(sel_t),
         .seg(seg_o),
-        .an(an_o),
+        .an(an_o)
     );
 
-    alu alu_t(
+    ALU alu(
         .clk(clk),
         .rst(rst),
         .sign(1),
