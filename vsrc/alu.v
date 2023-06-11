@@ -22,6 +22,12 @@ module alu (
     reg [7:0] reg_data2_ext;
 
 
+    reg cin_r;
+    reg [3 : 0] G;
+    reg [3 : 0] P;
+
+    reg [4: 0] sum_tmp;
+    reg [3 : 0] cout_tmp;
 
     always @(posedge clk) begin 
         if (rst) begin
@@ -30,11 +36,37 @@ module alu (
             reg_calc_cnt <= 3'd0;
             reg_state <= 2'd0;
             {M, M_comp} <= {5'd0, 5'd0};
+
+            cin_r <= 1'b0;
         end
         
         case (op)
             4'b1000: begin
-                reg_o[4:0] <= data1 + data2;
+                cin_r <= 1'b0;
+
+                G[0] <=  data1[0] & data2[0];        //第0bit加法
+                P[0] <=  data1[0] | data2[0];
+                sum_tmp[0] <= data1[0] ^ data2[0] ^ cin_r;
+                cout_tmp[0] <=  G[0] | P[0] & cin_r;
+
+                G[1] <=  data1[1] & data2[1];        //第1bit加法
+                P[1] <=  data1[1] | data2[1];
+                sum_tmp[1] <= data1[1] ^ data2[1] ^ cout_tmp[0];
+                cout_tmp[1] <=  G[1] | P[1] & cout_tmp[0];
+
+                G[2] <=  data1[2] & data2[2];        //第2bit加法
+                P[2] <=  data1[2] | data2[2];
+                sum_tmp[2] <= data1[2] ^ data2[2] ^ cout_tmp[1];
+                cout_tmp[2] <=  G[2] | P[2] & cout_tmp[1];
+
+                G[3] <=  data1[3] & data2[3];        //第3bit加法
+                P[3] <=  data1[3] | data2[3];
+                sum_tmp[3] <= data1[3] ^ data2[3] ^ cout_tmp[2];
+                cout_tmp[3] <=  G[3] | P[3] & cout_tmp[2];
+
+                sum_tmp[4] <= data1[3] ^ data2[3] ^ cout_tmp[3];
+
+                reg_o[4:0] <= sum_tmp;
             end 
             4'b0100: begin
                 reg_o[4:0] <= data1 - data2;
