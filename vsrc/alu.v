@@ -4,7 +4,7 @@ module ALU (
 
     // 1000 0100 0010 0001 0000
     //  +    -    *    /   STOP
-    input        sign, // 是否为有符号运算
+    input        sign,
     input  [3:0] op,
     input  [3:0] data1,
     input  [3:0] data2,
@@ -13,7 +13,7 @@ module ALU (
 );
     reg reg_busy;
     reg [9:0] reg_o;
-    
+    reg [3:0] reg_op;
     reg [2:0] reg_calc_cnt;
     reg [4:0] M, M_comp;
     reg [1:0] reg_state;
@@ -21,18 +21,26 @@ module ALU (
     reg [7:0] reg_data1_ext;
     reg [7:0] reg_data2_ext;
 
+    wire[3:0] state;
 
+    assign state = busy?reg_op:op;
 
     always @(posedge clk) begin 
         if (rst) begin
             reg_busy <= 1'b0;
             reg_o <= 10'd0;
+            reg_op <= 0;
             reg_calc_cnt <= 3'd0;
             reg_state <= 2'd0;
             {M, M_comp} <= {5'd0, 5'd0};
         end
-        
-        case (op)
+
+        if (busy)
+            reg_op <= reg_op;
+        else
+            reg_op <= op;
+
+        case (state)
             4'b1000: begin
                 reg_o[4:0] <= data1 + data2;
             end 
