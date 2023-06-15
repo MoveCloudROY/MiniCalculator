@@ -6,7 +6,7 @@ module Seg7(
     output [6:0] seg, // 七段数码管阴极
     output [3:0] an // 七段数码管阳极
 );
-    reg[16:0] clk_counter; // 时钟分频
+    reg[15:0] clk_counter; // 时钟分频
     reg new_clk;
     reg[3:0] seg_sel_t = 4'b0001; // 七段数码管选择, 每个时钟周期左移一位
     reg[6:0] seg_show_t;  // 实际选择的阴极输出

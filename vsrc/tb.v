@@ -5,10 +5,12 @@ reg clk;
 reg rst;
 reg [3:0] btn;
 reg [7:0] sw;
+reg con;
 // Outputs
 wire [6:0] seg;
 wire [3:0] an;
 wire led;
+
 
 // Instantiate
 top top_tb (
@@ -18,19 +20,28 @@ top top_tb (
     .sw_i(sw),
     .seg_o(seg),
     .an_o(an),
-    .led_o(led)
+    .led_o(led),
+    .con_i(con)
 );
+integer      i;
 initial begin
 // Initialize Inputs
 clk = 0;
 rst = 1;
 btn = 4'b0000;
 sw = 8'b0010_0010;
+con = 0;
 #10;
 rst = 0;
 #30;
 btn = 4'b1000;
-#30;
+
+for (i = 0; i < 2000; i=i+1) begin
+    #300000000
+    con = 0;
+end
+
+
 btn = 4'b0000;
 end
 

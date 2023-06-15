@@ -15,9 +15,9 @@ module top (
     wire [7:0] alu_t;
     wire [3:0] alu_op;
     wire alu_busy;
-    wire [3:0]op1_t;
+    wire [3:0] op1_t;
 
-    assign op1_t = (con_i == 1'b1) ? num_t[3:0] : sw_t[7:4];
+    assign op1_t = (con_i == 1'b1) ? alu_t[3:0] : sw_t[7:4];
 
     Controller ctrl(
         .clk(clk),
