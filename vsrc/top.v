@@ -3,6 +3,7 @@ module top (
     input rst,
     input [3:0] btn_i,
     input [7:0] sw_i,
+    input wire con_i,
     output [6:0] seg_o,
     output [3:0] an_o,
     output wire led_o
@@ -14,6 +15,9 @@ module top (
     wire [7:0] alu_t;
     wire [3:0] alu_op;
     wire alu_busy;
+    wire [3:0]op1_t;
+
+    assign op1_t = (con_i == 1'b1) ? num_t[3:0] : sw_t[7:4];
 
     Controller ctrl(
         .clk(clk),
@@ -36,6 +40,7 @@ module top (
 
     Buttons btn(
         .clk(clk),
+        .rst(rst),
         .btn_i(btn_i),
         .btn_o(btn_t)
     );
@@ -53,7 +58,7 @@ module top (
         .clk(clk),
         .rst(rst),
         .sign(1),
-        .data1 (sw_t[7:4]),
+        .data1 (op1_t),
         .data2 (sw_t[3:0]),
         .op(alu_op),
         .busy(alu_busy),
