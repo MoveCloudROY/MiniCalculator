@@ -16,9 +16,9 @@ end
 always @(posedge clk) begin
     if (rst) begin
         counter <= 25'd0;
-    end else if (btn_i != btn_prev) begin
+    end else if ((|btn_i == 1) && (|btn_prev == 0)) begin
         counter <= 25'd0;
-    end else if (counter == 25'd30000000) begin
+    end else if (counter == 25'd20000000) begin
         counter <= 25'd0;
     end else begin
         counter <= counter + 25'd1;
@@ -28,13 +28,13 @@ end
 // 每个时钟上升沿, 读取一次按键的值;
 // 输出中只有一位为1, 其余为0, 无论多少个按键按下
 always @(posedge clk) begin
-    if (btn_i[3] == 1'b1 && counter == 25'd30000000) begin // 加法 L
+    if (btn_i[3] == 1'b1 && counter == 25'd20000000) begin // 加法 L
         btn <= 4'b1000;
-    end else if (btn_i[2] == 1'b1 && counter == 25'd30000000) begin // 减法 R
+    end else if (btn_i[2] == 1'b1 && counter == 25'd20000000) begin // 减法 R
         btn <= 4'b0100;
-    end else if (btn_i[1] == 1'b1 && counter == 25'd30000000) begin // 乘法 U
+    end else if (btn_i[1] == 1'b1 && counter == 25'd20000000) begin // 乘法 U
         btn <= 4'b0010;
-    end else if (btn_i[0] == 1'b1 && counter == 25'd30000000) begin // 除法 D
+    end else if (btn_i[0] == 1'b1 && counter == 25'd20000000) begin // 除法 D
         btn <= 4'b0001;
     end else if (counter == 1) begin
         btn <= 4'b0000;
